@@ -1,6 +1,6 @@
 """
 usage:
-    time scrapy runspider imicrobe_test/crawler.py > count_open_files_crawl_log.txt
+    time scrapy runspider imicrobe_test/crawler.py &> count_open_files_crawl_log.txt
 """
 
 import scrapy
@@ -20,7 +20,7 @@ class GoodLinkSpider(scrapy.Spider):
     def start_requests(self):
         # this will be redirected to https://10.0.2.2:8443
         urls = [
-            'http://10.0.2.2:8000/'
+            'http://localhost:8000/'
         ]
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -31,14 +31,19 @@ class GoodLinkSpider(scrapy.Spider):
         #with open(filename, 'wt') as f:
         #    f.write(response.body)
         #self.log('Followed URL {}'.format(response.url))
-        if response.url.startswith('https://10.0.2.2'):
+        if response.url.startswith('https://localhost'):
             for link in response.css('a::attr(href)').extract():
                 if link is not None:
                     link_url = response.urljoin(link)
                     #self.log('found link url: {}'.format(link_url))
                     request = scrapy.Request(link_url, callback=self.parse)
-                    if request.url.startswith('https://10.0.2.2'):
-                        yield request
+                    if request.url.startswith('https://localhost'):
+                        if '/iplant/home/shared/' in request.url:
+                            pass
+                        elif 'datacommons.cyverse.org' in request.url:
+                            pass
+                        else:
+                            yield request
 
     def error(self, failure):
         # log all failures
